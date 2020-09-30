@@ -1,5 +1,6 @@
 from tkinter import *
 from modules.extracao_de_caracteristicas import Extract
+from modules.aprendizagem_bayesiana import AprendizagemBayesiana
 from tkinter.filedialog import askopenfilename
 
 import os
@@ -7,7 +8,10 @@ import os
 import arff
 
 class Application:
+
     def __init__(self, master=None):
+
+
         self.fonte = ("Verdana", "12")
 
         # Container de Botões
@@ -32,7 +36,7 @@ class Application:
         # Botão Selecionar Imagem
         self.btnClassify = Button(self.container1, text="Classificar",
                                 font=self.fonte, width=20)
-        self.btnClassify["command"] = self.select_image
+        self.btnClassify["command"] = self.classify
         self.btnClassify.pack(side=RIGHT)
 
         # Container de Imagens
@@ -49,9 +53,14 @@ class Application:
         # self.container3.grid(row=1, column=1)
 
         self.container4 = Frame(master)
-        self.container4.pack(side=RIGHT)
+        self.container3["pady"] = 10
+        self.container3["padx"] = 5
+        self.container4.pack(side=LEFT)
+
         self.container5 = Frame(master)
-        self.container5.pack(side=RIGHT)
+        self.container3["pady"] = 10
+        self.container3["padx"] = 5
+        self.container5.pack(side=LEFT)
         self.container6 = Frame(master)
         self.container6.pack(side=RIGHT)
         self.container7 = Frame(master)
@@ -59,46 +68,43 @@ class Application:
         self.container8 = Frame(master)
         self.container8.pack(side=RIGHT)
 
-        self.lblfeatures = Label(self.container3, text="Características",
-                              font=22, justify=CENTER)
-        self.lblfeatures.pack(side=TOP)
-
-        self.lblapu = Label(self.container4, text="APU",
+        # self.lblfeatures = Label(self.container3, text="Características",
+        #                       font=22, justify=CENTER)
+        # self.lblfeatures.pack(side=TOP)
+        #
+        self.lblapu = Label(self.container4, text="APU: ",
                                  font=22, justify=CENTER)
         self.lblapu.pack(side=LEFT)
-
-        self.lblapufeatureone = Label(self.container5, text="Cor da Pele",
+        #
+        self.lblapupercent = Label(self.container4, text="",
                             font=22, justify=CENTER)
-        self.lblapufeatureone.pack(side=LEFT)
-
-        self.lblapufeaturetwo = Label(self.container6, text="Cor da Jaqueta",
-                            font=22, justify=CENTER)
-        self.lblapufeaturetwo.pack(side=LEFT)
-
-        self.lblapufeaturethree = Label(self.container7, text="Cor da Calça",
-                            font=22, justify=CENTER)
-        self.lblapufeaturethree.pack(side=LEFT)
-
-        self.lblnelson = Label(self.container4, text="NELSON",
+        self.lblapupercent.pack(side=LEFT)
+        #
+        # self.lblapufeaturetwo = Label(self.container6, text="Cor da Jaqueta",
+        #                     font=22, justify=CENTER)
+        # self.lblapufeaturetwo.pack(side=LEFT)
+        #
+        # self.lblapufeaturethree = Label(self.container7, text="Cor da Calça",
+        #                     font=22, justify=CENTER)
+        # self.lblapufeaturethree.pack(side=LEFT)
+        #
+        self.lblnelson = Label(self.container5, text="NELSON: ",
                                  font=22, justify=CENTER)
-        self.lblnelson.pack(side=RIGHT)
-
-        self.lblnelsonfeatureone = Label(self.container5, text="Cor da Pele",
+        self.lblnelson.pack(side=LEFT)
+        #
+        self.lblnelsonpercent = Label(self.container5, text="",
                                       font=22, justify=CENTER)
-        self.lblnelsonfeatureone.pack(side=LEFT)
-
-        self.lblnelsonfeaturetwo = Label(self.container6, text="Cor do Colete",
-                                      font=22, justify=CENTER)
-        self.lblnelsonfeaturetwo.pack(side=LEFT)
-
-        self.lblnelsonfeaturethree = Label(self.container7, text="Cor da Camisa",
-                                        font=22, justify=CENTER)
-        self.lblnelsonfeaturethree.pack(side=LEFT)
-
-
+        self.lblnelsonpercent.pack(side=RIGHT)
         #
+        # self.lblnelsonfeaturetwo = Label(self.container6, text="Cor do Colete",
+        #                               font=22, justify=CENTER)
+        # self.lblnelsonfeaturetwo.pack(side=LEFT)
         #
-        #
+        # self.lblnelsonfeaturethree = Label(self.container7, text="Cor da Camisa",
+        #                                 font=22, justify=CENTER)
+        # self.lblnelsonfeaturethree.pack(side=LEFT)
+
+
         # self.lbloriginal = Label(self.container2, text="Imagem Original",
         #                       font=22, justify=CENTER )
         # self.lbloriginal.pack(side=TOP)
@@ -135,8 +141,18 @@ class Application:
     def select_image(self):
         Tk().withdraw()
         filename = askopenfilename()
-        Extract.extract_feature(filename, True)
+        img_extracted_features = Extract.extract_feature(filename, True)
+        img_extracted_features.pop(6)
 
+    def classify(self):
+        Tk().withdraw()
+        filename = askopenfilename()
+        img_extracted_features = Extract.extract_feature(filename, False)
+        img_extracted_features.pop(6)
+        # print("Caracterisiticas" ,img_extracted_features)
+        classification = AprendizagemBayesiana.bayes_classifier(img_extracted_features)
+        self.lblapupercent["text"] = str(round(classification[0]*100, 2)) + " %  "
+        self.lblnelsonpercent["text"] = str(round(classification[1]*100, 2)) + " %"
 
 root = Tk()
 Application(root)
